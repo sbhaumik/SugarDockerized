@@ -1,10 +1,10 @@
 <?php
 $config = [
-    'setup_db_type' => 'mysql',
-    'setup_db_host_name' => 'sugar-mysql',
+    'setup_db_type' => 'mssql',
+    'setup_db_host_name' => 'sugar-sqlserver',
     'setup_db_database_name' => 'sugar',
-    'setup_db_admin_user_name' => 'root',
-    'setup_db_admin_password' => 'root',
+    'setup_db_admin_user_name' => 'sa',
+    'setup_db_admin_password' => 'Sugar123!',
     'setup_db_drop_tables' => 1,
     'setup_db_create_database' => 1,
     'setup_site_admin_user_name' => 'admin',

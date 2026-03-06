@@ -8,7 +8,7 @@ then
     echo Provide the backup suffix as script parameters
 else
     # check if the stack is running
-    running=`docker ps | grep sugar-mysql | wc -l`
+    running=`docker ps | grep sugar-sqlserver | wc -l`
 
     # check if rsync is installed
     if [ `command -v rsync | grep rsync | wc -l` -eq 0 ]
@@ -35,7 +35,7 @@ else
         echo Restoring sugar from \"$BACKUP_DIR\"
 
         # if it is our repo, and the source exists, and the destination does not
-        if [ -f '.gitignore' ] && [ -d 'data' ] && [ -d $BACKUP_DIR ] && [ -d $BACKUP_DIR/sugar ] && ( [ -f $BACKUP_DIR/sugar.sql ] || [ -f $BACKUP_DIR/sugar.sql.tgz ] )
+        if [ -f '.gitignore' ] && [ -d 'data' ] && [ -d $BACKUP_DIR ] && [ -d $BACKUP_DIR/sugar ] && ( [ -f $BACKUP_DIR/sugar.bak ] || [ -f $BACKUP_DIR/sugar.bak.tgz ] )
         then
             if [ -d 'data/app/sugar' ]
             then
@@ -46,27 +46,28 @@ else
             echo Application files restored
 
             echo Restoring database
-            docker exec -it sugar-mysql mysqladmin -h localhost -f -u root -proot drop sugar | grep -v "mysqladmin: \[Warning\]"
-            docker exec -it sugar-mysql mysqladmin -h localhost -u root -proot create sugar | grep -v "mysqladmin: \[Warning\]"
+            docker exec -it sugar-sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "Sugar123!" -Q "IF DB_ID('sugar') IS NOT NULL DROP DATABASE [sugar]" -C
+            docker exec -it sugar-sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "Sugar123!" -Q "CREATE DATABASE [sugar]" -C
 
-            if [ -f $BACKUP_DIR/sugar.sql.tgz ]
+            if [ -f $BACKUP_DIR/sugar.bak.tgz ]
             then
                 if hash tar 2>/dev/null; then
-                    tar -zxf $BACKUP_DIR/sugar.sql.tgz
-                    echo Database uncompressed to $BACKUP_DIR/sugar.sql
+                    tar -zxf $BACKUP_DIR/sugar.bak.tgz
+                    echo Database backup uncompressed to $BACKUP_DIR/sugar.bak
                 fi
             fi
 
-            if [ -f $BACKUP_DIR/sugar.sql ]
+            if [ -f $BACKUP_DIR/sugar.bak ]
             then
-                cat $BACKUP_DIR/sugar.sql | docker exec -i sugar-mysql mysql -h localhost -u root -proot sugar
+                docker cp $BACKUP_DIR/sugar.bak sugar-sqlserver:/tmp/sugar_backup.bak
+                docker exec -it sugar-sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "Sugar123!" -Q "RESTORE DATABASE [sugar] FROM DISK = N'/tmp/sugar_backup.bak' WITH FILE = 1, REPLACE, NOUNLOAD, STATS = 5" -C
                 echo Database restored
             else
-                echo Database not found! The selected restore is corrupted
+                echo Database backup not found! The selected restore is corrupted
                 exit 1
             fi
 
-            if [ -f $BACKUP_DIR/sugar.sql.tgz ]
+            if [ -f $BACKUP_DIR/sugar.bak.tgz ]
             then
                 if [ -f $BACKUP_DIR/sugar.sql ]
                 then

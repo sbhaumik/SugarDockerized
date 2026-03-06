@@ -8,7 +8,7 @@ then
     echo Provide the backup suffix as script parameters
 else
     # check if the stack is running
-    running=`docker ps | grep sugar-mysql | wc -l`
+    running=`docker ps | grep sugar-sqlserver | wc -l`
 
     # check if rsync is installed
     if [ `command -v rsync | grep rsync | wc -l` -eq 0 ]
@@ -46,17 +46,18 @@ else
                     echo Application files NOT backed up!!!
                     echo Please discard the current backup
                 fi
-                #mysqldump -h docker.local -u root -proot --order-by-primary --single-transaction -Q --opt --skip-extended-insert sugar > $BACKUP_DIR/sugar.sql
-                # running mysqldump on the mysql container instead
-                docker exec -it sugar-mysql mysqldump -h localhost -u root -proot --order-by-primary --single-transaction -Q --opt --skip-extended-insert sugar | grep -v "mysqldump: \[Warning\]" > $BACKUP_DIR/sugar.sql
+                #sqlcmd backup script for SQL Server instead
+                # running sqlcmd backup on the sqlserver container instead
+                docker exec -it sugar-sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "Sugar123!" -Q "BACKUP DATABASE [sugar] TO DISK = N'/tmp/sugar_backup.bak' WITH FORMAT, INIT, NAME = 'sugar-full', SKIP, NOREWIND, NOUNLOAD, STATS = 10" -C
+                docker cp sugar-sqlserver:/tmp/sugar_backup.bak $BACKUP_DIR/sugar.bak
 
-                if [ \( -f $BACKUP_DIR/sugar.sql \) -a \( "$?" -eq 0 \) ]
+                if [ \( -f $BACKUP_DIR/sugar.bak \) -a \( "$?" -eq 0 \) ]
                 then
-                    echo Database backed up on $BACKUP_DIR/sugar.sql
+                    echo Database backed up on $BACKUP_DIR/sugar.bak
                     if hash tar 2>/dev/null; then
-                        tar -zcvf $BACKUP_DIR/sugar.sql.tgz $BACKUP_DIR/sugar.sql
+                        tar -zcvf $BACKUP_DIR/sugar.bak.tgz $BACKUP_DIR/sugar.bak
                     fi
-                    if [ -f $BACKUP_DIR/sugar.sql.tgz ]
+                    if [ -f $BACKUP_DIR/sugar.bak.tgz ]
                     then
                         echo Database compressed on $BACKUP_DIR/sugar.sql.tgz
                         rm $BACKUP_DIR/sugar.sql
