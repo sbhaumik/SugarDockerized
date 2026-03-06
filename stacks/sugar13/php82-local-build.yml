@@ -51,6 +51,7 @@ services:
             - "ACCEPT_EULA=Y"
             - "SA_PASSWORD=Sugar123!"
             - "MSSQL_PID=Express"
+            - "MSSQL_TCP_PORT=1433"
         volumes:
             - sqlserver-data:/var/opt/mssql
     elasticsearch:
