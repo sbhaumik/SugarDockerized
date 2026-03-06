@@ -1,4 +1,4 @@
-FROM debian:10.3
+FROM debian:12-slim
 LABEL maintainer="enrico.simonetti@gmail.com"
 
 RUN apt-get update \

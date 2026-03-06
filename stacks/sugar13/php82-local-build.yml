@@ -1,10 +1,10 @@
-version: '3'
-
 services:
     web1:
         container_name: "sugar-web1"
         image: sugar_php82_web
-        build: ../../images/php/82/apache
+        build:
+            context: ../../
+            dockerfile: images/php/82/apache/Dockerfile
         ports:
             - "80:80"
         extra_hosts:
@@ -16,42 +16,43 @@ services:
             - ../../data/app:/var/www/html
             - ../../images/php/82/apache/config/php/docker.ini:/usr/local/etc/php/conf.d/docker.ini
         depends_on:
-            - mysql
+            - sqlserver
             - elasticsearch
             - redis
             - permissions
         links:
-            - mysql
+            - sqlserver
             - elasticsearch
             - redis
     cron:
         container_name: "sugar-cron"
         image: sugar_php82_cron
-        build: ../../images/php/82/cron
+        build:
+            context: ../../
+            dockerfile: images/php/82/cron/Dockerfile
         volumes:
             - ../../data/app:/var/www/html
             - ../../images/php/82/cron/config/php/docker.ini:/usr/local/etc/php/conf.d/docker.ini
         depends_on:
-            - mysql
+            - sqlserver
             - elasticsearch
             - redis
             - permissions
         links:
-            - mysql
+            - sqlserver
             - elasticsearch
             - redis
-    mysql:
-        container_name: "sugar-mysql"
-        image: sugar_mysql
-        build: ../../images/mysql/8032
+    sqlserver:
+        container_name: "sugar-sqlserver"
+        image: mcr.microsoft.com/mssql/server:2019-latest
         ports:
-            - "3336:3306"
-        volumes:
-            - ../../data/mysql/8032:/var/lib/mysql
+            - "1433:1433"
         environment:
-            - MYSQL_ROOT_PASSWORD=root
-            - MYSQL_USER=sugar
-            - MYSQL_PASSWORD=sugar
+            - "ACCEPT_EULA=Y"
+            - "SA_PASSWORD=Sugar123!"
+            - "MSSQL_PID=Express"
+        volumes:
+            - sqlserver-data:/var/opt/mssql
     elasticsearch:
         image: elasticsearch:8.4.3
         container_name: "sugar-elasticsearch"
@@ -91,4 +92,6 @@ services:
 
 volumes:
     es-data01:
+        driver: local
+    sqlserver-data:
         driver: local
