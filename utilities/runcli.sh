@@ -8,7 +8,7 @@ then
     echo Provide the command\(s\) to run as arguments
 else
     # check if the stack is running
-    running=`docker ps | grep sugar-cron | wc -l`
+    running=`docker ps | grep sugar-web1 | wc -l`
 
     if [ $running -gt 0 ]
     then
@@ -20,7 +20,7 @@ else
         if [ -f '.gitignore' ] && [ -d 'data' ]
         then
             user_command="cd /var/www/html/sugar && $@"
-            docker exec sugar-cron bash -c "$user_command"
+            docker exec sugar-web1 bash -c "$user_command"
         else
             echo The command needs to be executed from within the clone of the repository
         fi
