@@ -16,7 +16,7 @@ then
 fi
 
 # check if the stack is running
-RUNNING=`docker ps | grep sugar-cron | wc -l`
+RUNNING=`docker ps | grep sugar-web1 | wc -l`
 
 if [ $RUNNING -gt 0 ]
 then
