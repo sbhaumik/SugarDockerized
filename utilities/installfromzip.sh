@@ -13,7 +13,7 @@ then
     echo Provide the zip file path containing the Sugar installer
 else
     # check if the stack is running
-    RUNNING=`docker ps | grep sugar-cron | wc -l`
+    RUNNING=`docker ps | grep sugar-web1 | wc -l`
 
     if [ $RUNNING -gt 0 ]
     then
