@@ -68,13 +68,14 @@ RUN docker-php-ext-install bcmath \
     && docker-php-ext-install zip \
     && docker-php-ext-install ldap \
     && docker-php-ext-install pdo \
-    && (pecl install sqlsrv || echo "sqlsrv installation failed, continuing...") \
-    && (pecl install pdo_sqlsrv || echo "pdo_sqlsrv installation failed, continuing...") \
-    && (docker-php-ext-enable sqlsrv || echo "sqlsrv extension enable failed, continuing...") \
-    && (docker-php-ext-enable pdo_sqlsrv || echo "pdo_sqlsrv extension enable failed, continuing...") \
-    && (pecl install xdebug || echo "xdebug installation failed, continuing...") \
-    && (pecl install redis || echo "redis installation failed, continuing...") \
-    && (docker-php-ext-enable redis || echo "redis extension enable failed, continuing...") \
+    && pecl channel-update pecl.php.net \
+    && pecl install sqlsrv-5.12.0 \
+    && pecl install pdo_sqlsrv-5.12.0 \
+    && docker-php-ext-enable sqlsrv \
+    && docker-php-ext-enable pdo_sqlsrv \
+    && pecl install xdebug \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
     && docker-php-ext-install soap
 
 RUN docker-php-ext-configure gd --with-freetype=/usr/include/ --with-jpeg=/usr/include/ \
